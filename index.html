@@ -4,81 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuerySolver - AI Chat</title>
-    <!-- FAVICON ADDED: Logo in browser tab -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/WptR9Fgg/Whats-App-Image-2025-06-28-at-12-22-35-AM-Photoroom.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- External Libraries for Markdown & Syntax Highlighting -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
     <style>
         :root {
-            /* Light Theme (Default) */
-            --bg-primary: #f1f5f9;
-            --bg-secondary: #ffffff;
-            --bg-chat: #f8fafc;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border-color: #e2e8f0;
-            --user-bubble-bg: #2563eb;
-            --user-bubble-text: #ffffff;
-            --bot-bubble-bg: #e2e8f0;
-            --bot-bubble-text: #1e293b;
-            --button-bg: #2563eb;
-            --button-hover: #1d4ed8;
-            --icon-hover-bg: rgba(100, 116, 139, 0.1);
-            --active-icon-color: #2563eb;
+            --bg-primary: #f1f5f9; --bg-secondary: #ffffff; --bg-chat: #f8fafc; --text-primary: #1e293b; --text-secondary: #64748b; --border-color: #e2e8f0; --user-bubble-bg: #2563eb; --user-bubble-text: #ffffff; --bot-bubble-bg: #e2e8f0; --bot-bubble-text: #1e293b; --button-bg: #2563eb; --button-hover: #1d4ed8; --icon-hover-bg: rgba(100, 116, 139, 0.1); --active-icon-color: #2563eb; --code-bg: #282c34;
         }
-
         body.dark-mode {
-            /* Dark Theme */
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-chat: #1a2332;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --border-color: #334155;
-            --bot-bubble-bg: #475569;
-            --bot-bubble-text: #f1f5f9;
-            --button-hover: #1e40af;
-            --icon-hover-bg: rgba(148, 163, 184, 0.2);
+            --bg-primary: #0f172a; --bg-secondary: #1e293b; --bg-chat: #1a2332; --text-primary: #f1f5f9; --text-secondary: #94a3b8; --border-color: #334155; --bot-bubble-bg: #475569; --bot-bubble-text: #f1f5f9; --button-hover: #1e40af; --icon-hover-bg: rgba(148, 163, 184, 0.2); --code-bg: #1e293b;
         }
-
         * { box-sizing: border-box; }
-
-        html { font-size: 16px; }
-
-        body {
-            font-family: 'Poppins', 'Segoe UI', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        
-        .sidebar {
-            position: fixed; top: 0; left: 0; height: 100%; width: 280px;
-            background-color: var(--bg-secondary);
-            border-right: 1px solid var(--border-color);
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-            z-index: 1000;
-            display: flex; flex-direction: column; padding: 20px;
-        }
+        html { font-size: 16px; scroll-behavior: smooth; }
+        body { font-family: 'Poppins', 'Segoe UI', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { position: fixed; top: 0; left: 0; height: 100%; width: 280px; background-color: var(--bg-secondary); border-right: 1px solid var(--border-color); transform: translateX(-100%); transition: transform 0.3s ease-in-out; z-index: 1000; display: flex; flex-direction: column; padding: 20px; }
         .sidebar.open { transform: translateX(0); }
         .sidebar-header { display: flex; align-items: center; gap: 12px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
         .sidebar-header .logo { width: 35px; height: 35px; }
         .sidebar-header h2 { font-size: 1.2rem; margin: 0; color: var(--text-primary);}
-        
         .sidebar-menu { list-style: none; padding: 20px 0; margin: 0; }
         .sidebar-menu li { display: flex; align-items: center; gap: 15px; padding: 12px 10px; border-radius: 8px; cursor: pointer; font-size: 0.95rem; color: var(--text-secondary); transition: background-color 0.2s, color 0.2s; }
         .sidebar-menu li:hover { background-color: var(--icon-hover-bg); color: var(--text-primary); }
         .sidebar-menu svg { width: 20px; height: 20px; }
-
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; z-index: 999; }
         .overlay.active { opacity: 1; visibility: visible; }
-
         .chat-container { width: 100%; height: 100vh; display: flex; flex-direction: column; background-color: var(--bg-secondary); transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out; }
         .chat-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; background-color: var(--bg-secondary); }
         .header-left { display: flex; align-items: center; gap: 15px; }
@@ -86,7 +41,6 @@
         .menu-btn svg { width: 24px; height: 24px; }
         .header-left .logo { width: 30px; height: 30px; }
         .chat-header h1 { font-size: 1.3rem; margin: 0; color: var(--text-primary); }
-        
         .theme-switch-wrapper { display: flex; align-items: center; }
         .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -94,82 +48,60 @@
         .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: #475569; }
         input:checked + .slider:before { transform: translateX(24px); }
-
-        .chat-box { flex-grow: 1; padding: 24px; overflow-y: auto; background-color: var(--bg-chat); }
-        .message-wrapper, .message-content, .actions-toolbar, #user-input, #send-btn { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+        .chat-box { flex-grow: 1; padding: 24px; overflow-y: auto; background-color: var(--bg-chat); position: relative; }
         .message-wrapper { display: flex; flex-direction: column; margin-bottom: 12px; }
         .message-content { padding: 12px 18px; border-radius: 18px; line-height: 1.6; font-size: 1rem; word-wrap: break-word; max-width: 85%; }
+        .message-content p:first-child { margin-top: 0; } .message-content p:last-child { margin-bottom: 0; }
         .sender { font-size: 0.8rem; font-weight: 500; margin-bottom: 5px; color: var(--text-secondary); }
         .user-message { align-items: flex-end; }
         .user-message .message-content { align-self: flex-end; background-color: var(--user-bubble-bg); color: var(--user-bubble-text); border-bottom-right-radius: 5px; }
         .bot-message { align-items: flex-start; }
         .bot-message .message-content { align-self: flex-start; background-color: var(--bot-bubble-bg); color: var(--bot-bubble-text); border-bottom-left-radius: 5px; }
         .bot-message strong { font-weight: 600; color: var(--user-bubble-bg); }
-        
-        .actions-toolbar { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-        .user-message .actions-toolbar { justify-content: flex-end; }
-        .bot-message .actions-toolbar { justify-content: flex-start; }
+        .actions-toolbar { display: flex; align-items: center; gap: 8px; margin-top: 8px; visibility: hidden; opacity: 0; transition: visibility 0s 0.2s, opacity 0.2s linear; }
+        .message-wrapper.finished-typing .actions-toolbar { visibility: visible; opacity: 1; transition-delay: 0s; }
         .action-btn { background: none; border: none; padding: 4px; cursor: pointer; color: var(--text-secondary); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .action-btn:hover { background-color: var(--icon-hover-bg); }
         .action-btn svg { width: 18px; height: 18px; }
         .action-btn.active { color: var(--active-icon-color); }
-        
-        /* --- NEW: Animated Dots Indicator --- */
-        .typing-indicator .message-content {
-            display: flex;
-            align-items: center;
-            gap: 6px; /* Space between dots */
-            background-color: var(--bot-bubble-bg);
-            color: var(--bot-bubble-text);
-            width: fit-content;
-        }
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: var(--text-secondary);
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-        .dot:nth-child(1) { animation-delay: -0.32s; }
-        .dot:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes bounce {
-          0%, 80%, 100% { transform: scale(0); }
-          40% { transform: scale(1.0); }
-        }
-        
+        .typing-cursor::after { content: '█'; color: var(--text-secondary); animation: blink 1s step-end infinite; }
+        @keyframes blink { from, to { opacity: 1; } 50% { opacity: 0; } }
         .input-frame { display: flex; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border-color); background-color: var(--bg-secondary); }
         #user-input { flex-grow: 1; padding: 14px 18px; font-size: 1rem; border: 1px solid var(--border-color); border-radius: 12px; background-color: var(--bg-chat); color: var(--text-primary); outline: none; font-family: 'Poppins', sans-serif; }
         #user-input:focus { border-color: var(--button-bg); box-shadow: 0 0 0 3px color-mix(in srgb, var(--button-bg) 30%, transparent); }
-        #send-btn { padding: 0 28px; font-size: 1rem; font-weight: 500; border: none; border-radius: 12px; background-color: var(--button-bg); color: white; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+        .input-button-wrapper { position: relative; }
+        #send-btn, #stop-btn { padding: 0 28px; font-size: 1rem; font-weight: 500; border: none; border-radius: 12px; background-color: var(--button-bg); color: white; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; height: 100%; }
+        #stop-btn { background-color: #ef4444; }
+        #stop-btn:hover { background-color: #dc2626; }
         #send-btn:hover { background-color: var(--button-hover); }
-        #send-btn:active { transform: scale(0.98); }
-        #send-btn svg { width: 22px; height: 22px; }
+        #send-btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        #send-btn svg, #stop-btn svg { width: 22px; height: 22px; }
+        
+        /* Suggested Prompts */
+        .prompt-suggestions { position: absolute; bottom: 80px; left: 0; right: 0; padding: 0 24px; display: none; flex-direction: column; align-items: center; gap: 15px; }
+        .prompt-suggestions.visible { display: flex; }
+        .prompt-card { background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: 12px 15px; border-radius: 10px; cursor: pointer; width: 100%; max-width: 600px; transition: background-color 0.2s; }
+        .prompt-card:hover { background-color: var(--icon-hover-bg); }
+        .prompt-card strong { color: var(--text-primary); font-weight: 500;}
+        .prompt-card span { color: var(--text-secondary); font-size: 0.9rem;}
 
-        /* --- RESPONSIVE DESIGN --- */
-        @media (min-width: 769px) {
-            .chat-container.sidebar-open { margin-left: 280px; width: calc(100% - 280px); }
-        }
-        @media (max-width: 768px) {
-            html { font-size: 15px; }
-            .chat-header, .input-frame { padding: 12px 15px; }
-            #send-btn { width: 48px; height: 48px; padding: 0; flex-shrink: 0; }
-            #send-btn span { display: none; }
-            .message-content { max-width: 90%; }
-            .header-left .logo { display: none; }
-        }
+        /* Code Blocks */
+        pre { position: relative; background-color: var(--code-bg); border-radius: 8px; padding: 1rem; color: #abb2bf; font-family: 'Courier New', Courier, monospace; overflow-x: auto;}
+        .code-copy-btn { position: absolute; top: 10px; right: 10px; background-color: #4b5563; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; opacity: 0; transition: opacity 0.2s; font-size: 0.8rem; }
+        pre:hover .code-copy-btn { opacity: 1; }
+        .code-copy-btn:hover { background-color: #6b7280; }
+
+        @media (min-width: 769px) { .chat-container.sidebar-open { margin-left: 280px; width: calc(100% - 280px); } }
+        @media (max-width: 768px) { html { font-size: 15px; } .chat-header, .input-frame { padding: 12px 15px; } .input-button-wrapper, #send-btn, #stop-btn { width: 48px; height: 48px; } #send-btn, #stop-btn { padding: 0; flex-shrink: 0; } #send-btn span, #stop-btn span { display: none; } .message-content { max-width: 90%; } .header-left .logo { display: none; } .prompt-suggestions { bottom: 70px; padding: 0 15px; } }
     </style>
 </head>
 <body>
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <img src="https://i.ibb.co/WptR9Fgg/Whats-App-Image-2025-06-28-at-12-22-35-AM-Photoroom.png" alt="Logo" class="logo">
-            <h2>QuerySolver</h2>
-        </div>
+        <div class="sidebar-header"><img src="https://i.ibb.co/WptR9Fgg/Whats-App-Image-2025-06-28-at-12-22-35-AM-Photoroom.png" alt="Logo" class="logo"><h2>QuerySolver</h2></div>
         <ul class="sidebar-menu">
-            <li id="new-chat-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg><span>New Chat</span></li>
-            <li id="save-history-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg><span>Download History</span></li>
-            <li id="clear-history-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg><span>Clear History</span></li>
+            <li id="new-chat-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg><span>New Chat</span></li>
+            <li id="save-history-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg><span>Download History</span></li>
+            <li id="clear-history-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg><span>Clear History</span></li>
         </ul>
     </aside>
     <div class="overlay" id="overlay"></div>
@@ -177,20 +109,25 @@
     <main class="chat-container" id="chat-container">
         <header class="chat-header">
             <div class="header-left">
-                <button class="menu-btn" id="menu-btn" title="Open menu"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
+                <button class="menu-btn" id="menu-btn" title="Open menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
                 <img src="https://i.ibb.co/WptR9Fgg/Whats-App-Image-2025-06-28-at-12-22-35-AM-Photoroom.png" alt="Logo" class="logo">
                 <h1>QuerySolver</h1>
             </div>
-            <div class="theme-switch-wrapper">
-                <label class="switch"><input type="checkbox" id="theme-toggle"><span class="slider"></span></label>
-            </div>
+            <div class="theme-switch-wrapper"><label class="switch"><input type="checkbox" id="theme-toggle"><span class="slider"></span></label></div>
         </header>
-
-        <div class="chat-box" id="chat-box"></div>
-
+        <div class="chat-box" id="chat-box">
+            <div class="prompt-suggestions" id="prompt-suggestions">
+                <div class="prompt-card" data-prompt="Explain quantum computing in simple terms"><strong>Explain quantum computing</strong><span>in simple terms</span></div>
+                <div class="prompt-card" data-prompt="Write a short story about a friendly robot who discovers music"><strong>Write a short story</strong><span>about a robot who discovers music</span></div>
+                <div class="prompt-card" data-prompt="What are some healthy and delicious meal prep ideas for a busy week?"><strong>Meal prep ideas</strong><span>for a busy week</span></div>
+                <div class="prompt-card" data-prompt="Translate 'Hello, how are you?' to Tamil"><strong>Translate to Tamil</strong><span>'Hello, how are you?'</span></div>
+            </div>
+        </div>
         <div class="input-frame">
             <input type="text" id="user-input" placeholder="Ask QuerySolver anything..." autocomplete="off">
-            <button id="send-btn"><span>Send</span></button>
+            <div class="input-button-wrapper">
+                <button id="send-btn"><span>Send</span></button>
+            </div>
         </div>
     </main>
 
@@ -198,54 +135,72 @@
         const API_KEY = 'AIzaSyAE0laIgvBHF48Vesznc9WURCrrEHFIhWA'; 
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
         
-        const chatBox = document.getElementById('chat-box'), userInput = document.getElementById('user-input'), sendBtn = document.getElementById('send-btn'), themeToggle = document.getElementById('theme-toggle'), sidebar = document.getElementById('sidebar'), menuBtn = document.getElementById('menu-btn'), overlay = document.getElementById('overlay'), chatContainer = document.getElementById('chat-container'), newChatBtn = document.getElementById('new-chat-btn'), clearHistoryBtn = document.getElementById('clear-history-btn'), saveHistoryBtn = document.getElementById('save-history-btn');
-
-        let chatHistory = [];
-        const replyStyles = [ "💡 **Insight Incoming!**", "🎯 **Here’s the scoop!**", "📘 **Let me explain…**", "🌐 **This might help:**", "🧠 **Brain spark activated!**" ];
-        const ICONS = { copy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`, check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`, edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`, thumbUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10v12"></path><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a2 2 0 0 1 3 1.88V10"></path></svg>`, thumbDown: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 14V2"></path><path d="M15 18.12 14 14H8.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 10.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a2 2 0 0 1-3-1.88V14"></path></svg>`, readAloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`, send: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`};
+        const dom = { chatBox: document.getElementById('chat-box'), userInput: document.getElementById('user-input'), sendBtn: document.getElementById('send-btn'), themeToggle: document.getElementById('theme-toggle'), sidebar: document.getElementById('sidebar'), menuBtn: document.getElementById('menu-btn'), overlay: document.getElementById('overlay'), chatContainer: document.getElementById('chat-container'), newChatBtn: document.getElementById('new-chat-btn'), clearHistoryBtn: document.getElementById('clear-history-btn'), saveHistoryBtn: document.getElementById('save-history-btn'), promptSuggestions: document.getElementById('prompt-suggestions'), inputButtonWrapper: document.querySelector('.input-button-wrapper') };
+        let chatHistory = [], abortController = null;
+        const ICONS = { copy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`, check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`, edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`, thumbUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10v12"></path><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a2 2 0 0 1 3 1.88V10"></path></svg>`, thumbDown: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 14V2"></path><path d="M15 18.12 14 14H8.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 10.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a2 2 0 0 1-3-1.88V14"></path></svg>`, readAloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`, send: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`, stop: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"></path></svg>`, regenerate: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>` };
         
-        document.addEventListener('DOMContentLoaded', () => { const savedTheme = localStorage.getItem('theme') || 'light'; applyTheme(savedTheme); loadChatHistory(); setSendButtonContent(); });
-        function applyTheme(theme) { document.body.classList.toggle('dark-mode', theme === 'dark'); themeToggle.checked = theme === 'dark'; }
-        themeToggle.addEventListener('change', () => { const newTheme = themeToggle.checked ? 'dark' : 'light'; localStorage.setItem('theme', newTheme); applyTheme(newTheme); });
-        menuBtn.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('active'); if (window.innerWidth > 768) chatContainer.classList.add('sidebar-open'); });
-        overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('active'); chatContainer.classList.remove('sidebar-open'); });
-        window.addEventListener('resize', setSendButtonContent);
+        document.addEventListener('DOMContentLoaded', initialize);
+        function initialize() { const savedTheme = localStorage.getItem('theme') || 'light'; applyTheme(savedTheme); loadChatHistory(); setSendButtonContent(); attachEventListeners(); }
+        function attachEventListeners() { dom.themeToggle.addEventListener('change', () => { const newTheme = dom.themeToggle.checked ? 'dark' : 'light'; localStorage.setItem('theme', newTheme); applyTheme(newTheme); }); dom.menuBtn.addEventListener('click', () => { dom.sidebar.classList.add('open'); dom.overlay.classList.add('active'); if (window.innerWidth > 768) dom.chatContainer.classList.add('sidebar-open'); }); dom.overlay.addEventListener('click', () => { dom.sidebar.classList.remove('open'); dom.overlay.classList.remove('active'); dom.chatContainer.classList.remove('sidebar-open'); }); window.addEventListener('resize', setSendButtonContent); dom.inputButtonWrapper.addEventListener('click', (e) => { const button = e.target.closest('button'); if (button.id === 'send-btn') handleSendMessage(); if (button.id === 'stop-btn') abortGeneration(); }); dom.userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }); dom.chatBox.addEventListener('click', handleActionClick); dom.newChatBtn.addEventListener('click', () => { if (confirm('Are you sure you want to start a new chat?')) { localStorage.removeItem('chatHistory'); location.reload(); } }); dom.clearHistoryBtn.addEventListener('click', () => { if (confirm('Are you sure you want to permanently delete all chat history?')) { localStorage.removeItem('chatHistory'); chatHistory = []; dom.chatBox.innerHTML = ''; showSuggestedPrompts(); } }); dom.saveHistoryBtn.addEventListener('click', downloadChatHistory); dom.promptSuggestions.addEventListener('click', (e) => { const card = e.target.closest('.prompt-card'); if (card) { dom.userInput.value = card.dataset.prompt; handleSendMessage(); } }); }
+        
+        function applyTheme(theme) { document.body.classList.toggle('dark-mode', theme === 'dark'); dom.themeToggle.checked = theme === 'dark'; }
+        function setSendButtonContent() { const isMobile = window.innerWidth <= 768; dom.inputButtonWrapper.innerHTML = `<button id="send-btn">${isMobile ? ICONS.send : '<span>Send</span>'}</button>`; }
+        function showStopButton() { const isMobile = window.innerWidth <= 768; dom.inputButtonWrapper.innerHTML = `<button id="stop-btn" title="Stop generating">${isMobile ? ICONS.stop : '<span>Stop</span>'}</button>`; }
 
         function saveChatHistory() { localStorage.setItem('chatHistory', JSON.stringify(chatHistory)); }
-        function loadChatHistory() {
-            const savedHistory = localStorage.getItem('chatHistory');
-            if (savedHistory) { chatHistory = JSON.parse(savedHistory); chatBox.innerHTML = ''; chatHistory.forEach(msg => appendMessage(msg.formattedText, msg.rawText, msg.sender, false)); } 
-            else { appendMessage("Hello! I'm QuerySolver. How can I help you today?", "Hello!", 'bot', true); }
-        }
-        newChatBtn.addEventListener('click', () => { if (confirm('Are you sure you want to start a new chat?')) { localStorage.removeItem('chatHistory'); location.reload(); } });
-        clearHistoryBtn.addEventListener('click', () => { if (confirm('Are you sure you want to permanently delete all chat history?')) { localStorage.removeItem('chatHistory'); chatHistory = []; chatBox.innerHTML = ''; appendMessage("History cleared. How can I help you now?", "History cleared.", 'bot', true); } });
-        saveHistoryBtn.addEventListener('click', downloadChatHistory);
+        function loadChatHistory() { const savedHistory = localStorage.getItem('chatHistory'); if (savedHistory && JSON.parse(savedHistory).length > 0) { chatHistory = JSON.parse(savedHistory); dom.chatBox.innerHTML = ''; chatHistory.forEach(msg => appendMessage(msg.rawText, msg.sender, false, true)); } else { showSuggestedPrompts(); } dom.chatBox.scrollTop = dom.chatBox.scrollHeight; }
+        function showSuggestedPrompts() { dom.promptSuggestions.classList.add('visible'); }
+        function hideSuggestedPrompts() { dom.promptSuggestions.classList.remove('visible'); }
         function downloadChatHistory() { let content = "QuerySolver Chat History\n=========================\n\n"; chatHistory.forEach(msg => { content += `${msg.sender === 'user' ? 'You:' : 'QuerySolver:'}\n${msg.rawText}\n\n`; }); const blob = new Blob([content], { type: 'text/plain;charset=utf-8' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `QuerySolver-Chat-${new Date().toISOString().split('T')[0]}.txt`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
-        function setSendButtonContent() { if (window.innerWidth <= 768) sendBtn.innerHTML = ICONS.send; else sendBtn.innerHTML = '<span>Send</span>'; }
 
-        sendBtn.addEventListener('click', handleSendMessage);
-        userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleSendMessage(); } });
-        chatBox.addEventListener('click', handleActionClick);
+        async function handleSendMessage() { const messageText = dom.userInput.value.trim(); if (!messageText) return; hideSuggestedPrompts(); appendMessage(messageText, 'user', true); dom.userInput.value = ''; showStopButton(); abortController = new AbortController(); try { const aiResponse = await askGemini(messageText, abortController.signal); appendMessage(aiResponse, 'bot', true); } catch (error) { if (error.name !== 'AbortError') { const errorMsg = `❌ Error: ${error.message}.`; appendMessage(errorMsg, 'bot', true, true); } } finally { setSendButtonContent(); abortController = null; } }
+        async function askGemini(message, signal) { const fullPrompt = `You are QuerySolver, a powerful multilingual AI assistant. Your primary goal is to be helpful, friendly, and accurate. Always detect and respond in the same language as the user's query. User's query: "${message}"`; const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ "text": fullPrompt }] }] }), signal }); if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error.message || `API Error: ${response.status}`); } const reply = await response.json(); if (reply.candidates && reply.candidates[0].content.parts[0].text) { return reply.candidates[0].content.parts[0].text; } else { throw new Error(`Invalid response from AI. Reason: ${reply.candidates[0]?.finishReason || 'Unknown'}`); } }
+        function abortGeneration() { if (abortController) { abortController.abort(); setSendButtonContent(); const lastBotMsg = dom.chatBox.querySelector('.bot-message:last-child'); if (lastBotMsg && !lastBotMsg.classList.contains('finished-typing')) { lastBotMsg.classList.add('finished-typing'); lastBotMsg.querySelector('.message-content').classList.remove('typing-cursor'); } } }
 
-        async function handleSendMessage() { const messageText = userInput.value.trim(); if (!messageText) return; appendMessage(messageText, messageText, 'user', true); userInput.value = ''; showTypingIndicator(); try { const aiResponse = await askGemini(messageText); const randomStyle = replyStyles[Math.floor(Math.random() * replyStyles.length)]; const finalResponse = `${randomStyle}\n${aiResponse}`; removeTypingIndicator(); appendMessage(finalResponse, aiResponse, 'bot', true); } catch (error) { removeTypingIndicator(); appendMessage(`❌ Error: ${error.message}.`, error.message, 'bot', true); } }
-        async function askGemini(message) { const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ "text": message }] }] }) }); if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error.message || `API Error: ${response.status}`); } const reply = await response.json(); if (reply.candidates && reply.candidates[0].content.parts[0].text) { return reply.candidates[0].content.parts[0].text; } else { throw new Error(`Invalid response from AI. Reason: ${reply.candidates[0]?.finishReason || 'Unknown'}`); } }
-        function appendMessage(formattedText, rawText, sender, save = true) { if (save) { chatHistory.push({ formattedText, rawText, sender }); saveChatHistory(); } const msgWrapper = document.createElement('div'); msgWrapper.className = `message-wrapper ${sender}-message`; const content = document.createElement('div'); content.className = 'message-content'; content.dataset.rawText = rawText; const parts = formattedText.split('**'); parts.forEach((part, index) => { const isBold = index % 2 === 1; part.split('\n').forEach((line, lineIndex) => { if (lineIndex > 0) content.appendChild(document.createElement('br')); const node = isBold ? document.createElement('strong') : document.createTextNode(line); if(isBold) node.textContent = line; content.appendChild(node); }); }); const toolbar = document.createElement('div'); toolbar.className = 'actions-toolbar'; if (sender === 'user') { toolbar.innerHTML = `<button class="action-btn" data-action="edit" title="Edit">${ICONS.edit}</button><button class="action-btn" data-action="copy" title="Copy">${ICONS.copy}</button>`; } else if (!rawText.startsWith("Hello!") && !rawText.startsWith("History cleared.")) { toolbar.innerHTML = `<button class="action-btn" data-action="copy" title="Copy">${ICONS.copy}</button><button class="action-btn" data-action="read-aloud" title="Read Aloud">${ICONS.readAloud}</button><button class="action-btn" data-action="rate-good" title="Good Response">${ICONS.thumbUp}</button><button class="action-btn" data-action="rate-bad" title="Bad Response">${ICONS.thumbDown}</button>`; } msgWrapper.innerHTML = `<div class="sender">${sender === 'user' ? 'You' : 'QuerySolver'}</div>`; msgWrapper.appendChild(content); msgWrapper.appendChild(toolbar); chatBox.appendChild(msgWrapper); chatBox.scrollTop = chatBox.scrollHeight; }
-        function handleActionClick(e) { const button = e.target.closest('.action-btn'); if (!button) return; const action = button.dataset.action; const rawText = button.closest('.message-wrapper').querySelector('.message-content').dataset.rawText; switch (action) { case 'copy': navigator.clipboard.writeText(rawText).then(() => { button.innerHTML = ICONS.check; setTimeout(() => { button.innerHTML = ICONS.copy; }, 2000); }); break; case 'edit': userInput.value = rawText; userInput.focus(); break; case 'read-aloud': speakText(rawText); break; case 'rate-good': case 'rate-bad': const toolbar = button.closest('.actions-toolbar'); toolbar.querySelector('[data-action="rate-good"]').classList.remove('active'); toolbar.querySelector('[data-action="rate-bad"]').classList.remove('active'); button.classList.add('active'); break; } }
-        
-        function showTypingIndicator() {
-            if (document.getElementById('typing-indicator')) return;
-            const indicator = `
-                <div id="typing-indicator" class="message-wrapper bot-message typing-indicator">
-                    <div class="sender">QuerySolver</div>
-                    <div class="message-content">
-                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                    </div>
-                </div>`;
-            chatBox.insertAdjacentHTML('beforeend', indicator);
-            chatBox.scrollTop = chatBox.scrollHeight;
+        function appendMessage(rawText, sender, save = true, isInstant = false) {
+            if (save) { chatHistory.push({ rawText, sender }); saveChatHistory(); }
+            const msgWrapper = createMessageWrapper(sender, rawText);
+            const content = msgWrapper.querySelector('.message-content');
+            dom.chatBox.appendChild(msgWrapper);
+            if (sender === 'bot' && !isInstant) {
+                setTimeout(() => msgWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                typewriterEffect(content, rawText, () => {
+                    msgWrapper.classList.add('finished-typing');
+                    hljs.highlightAll();
+                    addCopyButtonsToCodeBlocks();
+                    dom.userInput.focus();
+                });
+            } else {
+                content.innerHTML = marked.parse(rawText);
+                msgWrapper.classList.add('finished-typing');
+                hljs.highlightAll();
+                addCopyButtonsToCodeBlocks();
+                dom.chatBox.scrollTop = dom.chatBox.scrollHeight;
+            }
         }
-        function removeTypingIndicator() { document.getElementById('typing-indicator')?.remove(); }
-        function speakText(text) { window.speechSynthesis.cancel(); const cleanText = text.replace(/\*\*|\*/g, ''); const utterance = new SpeechSynthesisUtterance(cleanText); utterance.lang = 'en-US'; utterance.rate = 1.0; window.speechSynthesis.speak(utterance); }
+        
+        function createMessageWrapper(sender, rawText) {
+            const msgWrapper = document.createElement('div');
+            msgWrapper.className = `message-wrapper ${sender}-message`;
+            msgWrapper.dataset.rawText = rawText;
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            const toolbar = document.createElement('div');
+            toolbar.className = 'actions-toolbar';
+            if (sender === 'user') { toolbar.innerHTML = `<button class="action-btn" data-action="edit" title="Edit">${ICONS.edit}</button><button class="action-btn" data-action="copy" title="Copy">${ICONS.copy}</button>`; } 
+            else { toolbar.innerHTML = `<button class="action-btn" data-action="regenerate" title="Regenerate">${ICONS.regenerate}</button><button class="action-btn" data-action="copy" title="Copy">${ICONS.copy}</button><button class="action-btn" data-action="read-aloud" title="Read Aloud">${ICONS.readAloud}</button><button class="action-btn" data-action="rate-good" title="Good Response">${ICONS.thumbUp}</button><button class="action-btn" data-action="rate-bad" title="Bad Response">${ICONS.thumbDown}</button>`; }
+            msgWrapper.innerHTML = `<div class="sender">${sender === 'user' ? 'You' : 'QuerySolver'}</div>`;
+            msgWrapper.appendChild(content);
+            msgWrapper.appendChild(toolbar);
+            return msgWrapper;
+        }
+
+        function typewriterEffect(element, text, onComplete) { element.innerHTML = ''; element.classList.add('typing-cursor'); let i = 0; const typingInterval = setInterval(() => { if (i < text.length) { element.innerHTML = marked.parse(text.substring(0, i + 1)); i++; dom.chatBox.scrollTop = dom.chatBox.scrollHeight; } else { clearInterval(typingInterval); element.classList.remove('typing-cursor'); if (onComplete) onComplete(); } }, 20); }
+        function addCopyButtonsToCodeBlocks() { document.querySelectorAll('pre').forEach(pre => { if (pre.querySelector('.code-copy-btn')) return; const button = document.createElement('button'); button.className = 'code-copy-btn'; button.textContent = 'Copy'; button.onclick = () => { const code = pre.querySelector('code').innerText; navigator.clipboard.writeText(code).then(() => { button.textContent = 'Copied!'; setTimeout(() => { button.textContent = 'Copy'; }, 2000); }); }; pre.appendChild(button); }); }
+        
+        function handleActionClick(e) { const button = e.target.closest('.action-btn'); if (!button) return; const msgWrapper = button.closest('.message-wrapper'); const rawText = msgWrapper.dataset.rawText; const action = button.dataset.action; switch (action) { case 'copy': navigator.clipboard.writeText(rawText).then(() => { button.innerHTML = ICONS.check; setTimeout(() => { button.innerHTML = ICONS.copy; }, 2000); }); break; case 'edit': dom.userInput.value = rawText; dom.userInput.focus(); break; case 'read-aloud': speakText(rawText); break; case 'rate-good': case 'rate-bad': const toolbar = button.closest('.actions-toolbar'); toolbar.querySelector('[data-action="rate-good"]').classList.remove('active'); toolbar.querySelector('[data-action="rate-bad"]').classList.remove('active'); button.classList.add('active'); break; case 'regenerate': handleRegenerate(msgWrapper); break; } }
+        function handleRegenerate(oldBotMessageWrapper) { const lastUserMessage = chatHistory.filter(m => m.sender === 'user').pop(); if (!lastUserMessage) return; oldBotMessageWrapper.remove(); chatHistory = chatHistory.filter(m => m.rawText !== oldBotMessageWrapper.dataset.rawText); saveChatHistory(); dom.userInput.value = lastUserMessage.rawText; handleSendMessage(); }
+        function speakText(text) { window.speechSynthesis.cancel(); const cleanText = text.replace(/<[^>]*>/g, ''); const utterance = new SpeechSynthesisUtterance(cleanText); utterance.lang = 'en-US'; utterance.rate = 1.0; window.speechSynthesis.speak(utterance); }
     </script>
 </body>
 </html>
