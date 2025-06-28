@@ -57,7 +57,6 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
         
-        /* --- Sidebar & Overlay --- */
         .sidebar {
             position: fixed; top: 0; left: 0; height: 100%; width: 280px;
             background-color: var(--bg-secondary);
@@ -106,6 +105,7 @@
         .bot-message { align-items: flex-start; }
         .bot-message .message-content { align-self: flex-start; background-color: var(--bot-bubble-bg); color: var(--bot-bubble-text); border-bottom-left-radius: 5px; }
         .bot-message strong { font-weight: 600; color: var(--user-bubble-bg); }
+        
         .actions-toolbar { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
         .user-message .actions-toolbar { justify-content: flex-end; }
         .bot-message .actions-toolbar { justify-content: flex-start; }
@@ -113,7 +113,30 @@
         .action-btn:hover { background-color: var(--icon-hover-bg); }
         .action-btn svg { width: 18px; height: 18px; }
         .action-btn.active { color: var(--active-icon-color); }
-        .typing-indicator .message-content { font-style: italic; color: var(--text-secondary); }
+        
+        /* --- NEW: Animated Dots Indicator --- */
+        .typing-indicator .message-content {
+            display: flex;
+            align-items: center;
+            gap: 6px; /* Space between dots */
+            background-color: var(--bot-bubble-bg);
+            color: var(--bot-bubble-text);
+            width: fit-content;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--text-secondary);
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+          0%, 80%, 100% { transform: scale(0); }
+          40% { transform: scale(1.0); }
+        }
         
         .input-frame { display: flex; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border-color); background-color: var(--bg-secondary); }
         #user-input { flex-grow: 1; padding: 14px 18px; font-size: 1rem; border: 1px solid var(--border-color); border-radius: 12px; background-color: var(--bg-chat); color: var(--text-primary); outline: none; font-family: 'Poppins', sans-serif; }
@@ -125,19 +148,12 @@
 
         /* --- RESPONSIVE DESIGN --- */
         @media (min-width: 769px) {
-            .chat-container.sidebar-open {
-                margin-left: 280px;
-                width: calc(100% - 280px);
-            }
+            .chat-container.sidebar-open { margin-left: 280px; width: calc(100% - 280px); }
         }
         @media (max-width: 768px) {
             html { font-size: 15px; }
             .chat-header, .input-frame { padding: 12px 15px; }
-            #send-btn {
-                width: 48px;
-                height: 48px;
-                padding: 0;
-            }
+            #send-btn { width: 48px; height: 48px; padding: 0; flex-shrink: 0; }
             #send-btn span { display: none; }
             .message-content { max-width: 90%; }
             .header-left .logo { display: none; }
@@ -151,18 +167,9 @@
             <h2>QuerySolver</h2>
         </div>
         <ul class="sidebar-menu">
-            <li id="new-chat-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
-                <span>New Chat</span>
-            </li>
-            <li id="save-history-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
-                <span>Download History</span>
-            </li>
-            <li id="clear-history-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                <span>Clear History</span>
-            </li>
+            <li id="new-chat-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg><span>New Chat</span></li>
+            <li id="save-history-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg><span>Download History</span></li>
+            <li id="clear-history-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg><span>Clear History</span></li>
         </ul>
     </aside>
     <div class="overlay" id="overlay"></div>
@@ -170,17 +177,12 @@
     <main class="chat-container" id="chat-container">
         <header class="chat-header">
             <div class="header-left">
-                <button class="menu-btn" id="menu-btn" title="Open menu">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-                </button>
+                <button class="menu-btn" id="menu-btn" title="Open menu"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
                 <img src="https://i.ibb.co/WptR9Fgg/Whats-App-Image-2025-06-28-at-12-22-35-AM-Photoroom.png" alt="Logo" class="logo">
                 <h1>QuerySolver</h1>
             </div>
             <div class="theme-switch-wrapper">
-                <label class="switch">
-                    <input type="checkbox" id="theme-toggle">
-                    <span class="slider"></span>
-                </label>
+                <label class="switch"><input type="checkbox" id="theme-toggle"><span class="slider"></span></label>
             </div>
         </header>
 
@@ -188,9 +190,7 @@
 
         <div class="input-frame">
             <input type="text" id="user-input" placeholder="Ask QuerySolver anything..." autocomplete="off">
-            <button id="send-btn">
-                <span>Send</span>
-            </button>
+            <button id="send-btn"><span>Send</span></button>
         </div>
     </main>
 
@@ -198,196 +198,54 @@
         const API_KEY = 'AIzaSyAE0laIgvBHF48Vesznc9WURCrrEHFIhWA'; 
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
         
-        const chatBox = document.getElementById('chat-box');
-        const userInput = document.getElementById('user-input');
-        const sendBtn = document.getElementById('send-btn');
-        const themeToggle = document.getElementById('theme-toggle');
-        const sidebar = document.getElementById('sidebar');
-        const menuBtn = document.getElementById('menu-btn');
-        const overlay = document.getElementById('overlay');
-        const chatContainer = document.getElementById('chat-container');
-        const newChatBtn = document.getElementById('new-chat-btn');
-        const clearHistoryBtn = document.getElementById('clear-history-btn');
-        const saveHistoryBtn = document.getElementById('save-history-btn');
+        const chatBox = document.getElementById('chat-box'), userInput = document.getElementById('user-input'), sendBtn = document.getElementById('send-btn'), themeToggle = document.getElementById('theme-toggle'), sidebar = document.getElementById('sidebar'), menuBtn = document.getElementById('menu-btn'), overlay = document.getElementById('overlay'), chatContainer = document.getElementById('chat-container'), newChatBtn = document.getElementById('new-chat-btn'), clearHistoryBtn = document.getElementById('clear-history-btn'), saveHistoryBtn = document.getElementById('save-history-btn');
 
         let chatHistory = [];
         const replyStyles = [ "💡 **Insight Incoming!**", "🎯 **Here’s the scoop!**", "📘 **Let me explain…**", "🌐 **This might help:**", "🧠 **Brain spark activated!**" ];
-        const ICONS = {
-            copy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
-            check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
-            edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
-            thumbUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10v12"></path><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a2 2 0 0 1 3 1.88V10"></path></svg>`,
-            thumbDown: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 14V2"></path><path d="M15 18.12 14 14H8.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 10.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a2 2 0 0 1-3-1.88V14"></path></svg>`,
-            readAloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`,
-            send: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`
-        };
+        const ICONS = { copy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`, check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`, edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`, thumbUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10v12"></path><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a2 2 0 0 1 3 1.88V10"></path></svg>`, thumbDown: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 14V2"></path><path d="M15 18.12 14 14H8.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 10.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a2 2 0 0 1-3-1.88V14"></path></svg>`, readAloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`, send: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>`};
         
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light'; 
-            applyTheme(savedTheme);
-            loadChatHistory();
-            setSendButtonContent();
-        });
-
-        function applyTheme(theme) {
-            document.body.classList.toggle('dark-mode', theme === 'dark');
-            themeToggle.checked = theme === 'dark';
-        }
-        themeToggle.addEventListener('change', () => {
-            const newTheme = themeToggle.checked ? 'dark' : 'light';
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
-        });
-        menuBtn.addEventListener('click', () => {
-            sidebar.classList.add('open');
-            overlay.classList.add('active');
-            if (window.innerWidth > 768) {
-                chatContainer.classList.add('sidebar-open');
-            }
-        });
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-            chatContainer.classList.remove('sidebar-open');
-        });
+        document.addEventListener('DOMContentLoaded', () => { const savedTheme = localStorage.getItem('theme') || 'light'; applyTheme(savedTheme); loadChatHistory(); setSendButtonContent(); });
+        function applyTheme(theme) { document.body.classList.toggle('dark-mode', theme === 'dark'); themeToggle.checked = theme === 'dark'; }
+        themeToggle.addEventListener('change', () => { const newTheme = themeToggle.checked ? 'dark' : 'light'; localStorage.setItem('theme', newTheme); applyTheme(newTheme); });
+        menuBtn.addEventListener('click', () => { sidebar.classList.add('open'); overlay.classList.add('active'); if (window.innerWidth > 768) chatContainer.classList.add('sidebar-open'); });
+        overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('active'); chatContainer.classList.remove('sidebar-open'); });
         window.addEventListener('resize', setSendButtonContent);
 
         function saveChatHistory() { localStorage.setItem('chatHistory', JSON.stringify(chatHistory)); }
         function loadChatHistory() {
             const savedHistory = localStorage.getItem('chatHistory');
-            if (savedHistory) {
-                chatHistory = JSON.parse(savedHistory);
-                chatBox.innerHTML = '';
-                chatHistory.forEach(msg => appendMessage(msg.formattedText, msg.rawText, msg.sender, false));
-            } else {
-                appendMessage("Hello! I'm QuerySolver. How can I help you today?", "Hello!", 'bot', true);
-            }
+            if (savedHistory) { chatHistory = JSON.parse(savedHistory); chatBox.innerHTML = ''; chatHistory.forEach(msg => appendMessage(msg.formattedText, msg.rawText, msg.sender, false)); } 
+            else { appendMessage("Hello! I'm QuerySolver. How can I help you today?", "Hello!", 'bot', true); }
         }
-        newChatBtn.addEventListener('click', () => {
-             if (confirm('Are you sure you want to start a new chat? This will clear the current conversation.')) {
-                localStorage.removeItem('chatHistory');
-                location.reload();
-             }
-        });
-        clearHistoryBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to permanently delete all chat history? This cannot be undone.')) {
-                localStorage.removeItem('chatHistory');
-                chatHistory = [];
-                chatBox.innerHTML = '';
-                appendMessage("History cleared. How can I help you now?", "History cleared.", 'bot', true);
-            }
-        });
+        newChatBtn.addEventListener('click', () => { if (confirm('Are you sure you want to start a new chat?')) { localStorage.removeItem('chatHistory'); location.reload(); } });
+        clearHistoryBtn.addEventListener('click', () => { if (confirm('Are you sure you want to permanently delete all chat history?')) { localStorage.removeItem('chatHistory'); chatHistory = []; chatBox.innerHTML = ''; appendMessage("History cleared. How can I help you now?", "History cleared.", 'bot', true); } });
         saveHistoryBtn.addEventListener('click', downloadChatHistory);
-        function downloadChatHistory() {
-            let content = "QuerySolver Chat History\n=========================\n\n";
-            chatHistory.forEach(msg => {
-                const prefix = msg.sender === 'user' ? 'You:' : 'QuerySolver:';
-                content += `${prefix}\n${msg.rawText}\n\n`;
-            });
-            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `QuerySolver-Chat-${new Date().toISOString().split('T')[0]}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-        function setSendButtonContent() {
-            if (window.innerWidth <= 768) {
-                sendBtn.innerHTML = ICONS.send;
-            } else {
-                sendBtn.innerHTML = '<span>Send</span>';
-            }
-        }
+        function downloadChatHistory() { let content = "QuerySolver Chat History\n=========================\n\n"; chatHistory.forEach(msg => { content += `${msg.sender === 'user' ? 'You:' : 'QuerySolver:'}\n${msg.rawText}\n\n`; }); const blob = new Blob([content], { type: 'text/plain;charset=utf-8' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `QuerySolver-Chat-${new Date().toISOString().split('T')[0]}.txt`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
+        function setSendButtonContent() { if (window.innerWidth <= 768) sendBtn.innerHTML = ICONS.send; else sendBtn.innerHTML = '<span>Send</span>'; }
 
         sendBtn.addEventListener('click', handleSendMessage);
         userInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleSendMessage(); } });
         chatBox.addEventListener('click', handleActionClick);
 
-        async function handleSendMessage() {
-            const messageText = userInput.value.trim();
-            if (!messageText) return;
-            appendMessage(messageText, messageText, 'user', true);
-            userInput.value = '';
-            showTypingIndicator();
-            try {
-                const aiResponse = await askGemini(messageText);
-                const randomStyle = replyStyles[Math.floor(Math.random() * replyStyles.length)];
-                const finalResponse = `${randomStyle}\n${aiResponse}`;
-                removeTypingIndicator();
-                appendMessage(finalResponse, aiResponse, 'bot', true);
-            } catch (error) {
-                removeTypingIndicator();
-                appendMessage(`❌ Error: ${error.message}.`, error.message, 'bot', true);
-            }
-        }
-        async function askGemini(message) {
-            const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ "text": message }] }] }) });
-            if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error.message || `API Error: ${response.status}`); }
-            const reply = await response.json();
-            if (reply.candidates && reply.candidates[0].content.parts[0].text) { return reply.candidates[0].content.parts[0].text; } 
-            else { throw new Error(`Invalid response from AI. Reason: ${reply.candidates[0]?.finishReason || 'Unknown'}`); }
-        }
-        function appendMessage(formattedText, rawText, sender, save = true) {
-            if (save) { chatHistory.push({ formattedText, rawText, sender }); saveChatHistory(); }
-            const msgWrapper = document.createElement('div');
-            msgWrapper.className = `message-wrapper ${sender}-message`;
-            const content = document.createElement('div');
-            content.className = 'message-content';
-            content.dataset.rawText = rawText;
-            const parts = formattedText.split('**');
-            parts.forEach((part, index) => {
-                const isBold = index % 2 === 1;
-                part.split('\n').forEach((line, lineIndex) => {
-                    if (lineIndex > 0) content.appendChild(document.createElement('br'));
-                    const node = isBold ? document.createElement('strong') : document.createTextNode(line);
-                    if(isBold) node.textContent = line;
-                    content.appendChild(node);
-                });
-            });
-            const toolbar = document.createElement('div');
-            toolbar.className = 'actions-toolbar';
-            if (sender === 'user') { toolbar.innerHTML = `<button class="action-btn" data-action="edit" title="Edit">${ICONS.edit}</button><button class="action-btn" data-action="copy" title="Copy">${ICONS.copy}</button>`; } 
-            else if (!rawText.startsWith("Hello!") && !rawText.startsWith("History cleared.")) { toolbar.innerHTML = `<button class="action-btn" data-action="copy" title="Copy">${ICONS.copy}</button><button class="action-btn" data-action="read-aloud" title="Read Aloud">${ICONS.readAloud}</button><button class="action-btn" data-action="rate-good" title="Good Response">${ICONS.thumbUp}</button><button class="action-btn" data-action="rate-bad" title="Bad Response">${ICONS.thumbDown}</button>`; }
-            msgWrapper.innerHTML = `<div class="sender">${sender === 'user' ? 'You' : 'QuerySolver'}</div>`;
-            msgWrapper.appendChild(content);
-            msgWrapper.appendChild(toolbar);
-            chatBox.appendChild(msgWrapper);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-        function handleActionClick(e) {
-            const button = e.target.closest('.action-btn');
-            if (!button) return;
-            const action = button.dataset.action;
-            const rawText = button.closest('.message-wrapper').querySelector('.message-content').dataset.rawText;
-            switch (action) {
-                case 'copy': navigator.clipboard.writeText(rawText).then(() => { button.innerHTML = ICONS.check; setTimeout(() => { button.innerHTML = ICONS.copy; }, 2000); }); break;
-                case 'edit': userInput.value = rawText; userInput.focus(); break;
-                case 'read-aloud': speakText(rawText); break;
-                case 'rate-good': case 'rate-bad':
-                    const toolbar = button.closest('.actions-toolbar');
-                    toolbar.querySelector('[data-action="rate-good"]').classList.remove('active');
-                    toolbar.querySelector('[data-action="rate-bad"]').classList.remove('active');
-                    button.classList.add('active'); break;
-            }
-        }
+        async function handleSendMessage() { const messageText = userInput.value.trim(); if (!messageText) return; appendMessage(messageText, messageText, 'user', true); userInput.value = ''; showTypingIndicator(); try { const aiResponse = await askGemini(messageText); const randomStyle = replyStyles[Math.floor(Math.random() * replyStyles.length)]; const finalResponse = `${randomStyle}\n${aiResponse}`; removeTypingIndicator(); appendMessage(finalResponse, aiResponse, 'bot', true); } catch (error) { removeTypingIndicator(); appendMessage(`❌ Error: ${error.message}.`, error.message, 'bot', true); } }
+        async function askGemini(message) { const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ "text": message }] }] }) }); if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error.message || `API Error: ${response.status}`); } const reply = await response.json(); if (reply.candidates && reply.candidates[0].content.parts[0].text) { return reply.candidates[0].content.parts[0].text; } else { throw new Error(`Invalid response from AI. Reason: ${reply.candidates[0]?.finishReason || 'Unknown'}`); } }
+        function appendMessage(formattedText, rawText, sender, save = true) { if (save) { chatHistory.push({ formattedText, rawText, sender }); saveChatHistory(); } const msgWrapper = document.createElement('div'); msgWrapper.className = `message-wrapper ${sender}-message`; const content = document.createElement('div'); content.className = 'message-content'; content.dataset.rawText = rawText; const parts = formattedText.split('**'); parts.forEach((part, index) => { const isBold = index % 2 === 1; part.split('\n').forEach((line, lineIndex) => { if (lineIndex > 0) content.appendChild(document.createElement('br')); const node = isBold ? document.createElement('strong') : document.createTextNode(line); if(isBold) node.textContent = line; content.appendChild(node); }); }); const toolbar = document.createElement('div'); toolbar.className = 'actions-toolbar'; if (sender === 'user') { toolbar.innerHTML = `<button class="action-btn" data-action="edit" title="Edit">${ICONS.edit}</button><button class="action-btn" data-action="copy" title="Copy">${ICONS.copy}</button>`; } else if (!rawText.startsWith("Hello!") && !rawText.startsWith("History cleared.")) { toolbar.innerHTML = `<button class="action-btn" data-action="copy" title="Copy">${ICONS.copy}</button><button class="action-btn" data-action="read-aloud" title="Read Aloud">${ICONS.readAloud}</button><button class="action-btn" data-action="rate-good" title="Good Response">${ICONS.thumbUp}</button><button class="action-btn" data-action="rate-bad" title="Bad Response">${ICONS.thumbDown}</button>`; } msgWrapper.innerHTML = `<div class="sender">${sender === 'user' ? 'You' : 'QuerySolver'}</div>`; msgWrapper.appendChild(content); msgWrapper.appendChild(toolbar); chatBox.appendChild(msgWrapper); chatBox.scrollTop = chatBox.scrollHeight; }
+        function handleActionClick(e) { const button = e.target.closest('.action-btn'); if (!button) return; const action = button.dataset.action; const rawText = button.closest('.message-wrapper').querySelector('.message-content').dataset.rawText; switch (action) { case 'copy': navigator.clipboard.writeText(rawText).then(() => { button.innerHTML = ICONS.check; setTimeout(() => { button.innerHTML = ICONS.copy; }, 2000); }); break; case 'edit': userInput.value = rawText; userInput.focus(); break; case 'read-aloud': speakText(rawText); break; case 'rate-good': case 'rate-bad': const toolbar = button.closest('.actions-toolbar'); toolbar.querySelector('[data-action="rate-good"]').classList.remove('active'); toolbar.querySelector('[data-action="rate-bad"]').classList.remove('active'); button.classList.add('active'); break; } }
+        
         function showTypingIndicator() {
             if (document.getElementById('typing-indicator')) return;
-            const indicator = `<div id="typing-indicator" class="message-wrapper bot-message typing-indicator"><div class="sender">QuerySolver</div><div class="message-content">is typing...</div></div>`;
+            const indicator = `
+                <div id="typing-indicator" class="message-wrapper bot-message typing-indicator">
+                    <div class="sender">QuerySolver</div>
+                    <div class="message-content">
+                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </div>
+                </div>`;
             chatBox.insertAdjacentHTML('beforeend', indicator);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
         function removeTypingIndicator() { document.getElementById('typing-indicator')?.remove(); }
-        function speakText(text) {
-            window.speechSynthesis.cancel();
-            const cleanText = text.replace(/\*\*|\*/g, '');
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.lang = 'en-US';
-            utterance.rate = 1.0;
-            window.speechSynthesis.speak(utterance);
-        }
+        function speakText(text) { window.speechSynthesis.cancel(); const cleanText = text.replace(/\*\*|\*/g, ''); const utterance = new SpeechSynthesisUtterance(cleanText); utterance.lang = 'en-US'; utterance.rate = 1.0; window.speechSynthesis.speak(utterance); }
     </script>
 </body>
 </html>
