@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuerySolver - AI Chat</title>
-    <link rel="icon" type="image/png" href="https://i.ibb.co/WptR9Fgg/Whats-App-Image-2025-06-28-at-12-22-35-AM-Photoroom.png">
+    <!-- NEW LOGO ADDED HERE (FAVICON) -->
+    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/R40vTCDB/QSlogo.jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -27,7 +28,7 @@
         .sidebar.open { transform: translateX(0); }
         .sidebar-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border-color); flex-shrink: 0;}
         .sidebar-header .logo-title { display: flex; align-items: center; gap: 12px; }
-        .sidebar-header .logo { width: 35px; height: 35px; }
+        .sidebar-header .logo { width: 35px; height: 35px; border-radius: 8px; }
         .sidebar-header h2 { font-size: 1.2rem; margin: 0; color: var(--text-primary);}
         .sidebar-content { flex-grow: 1; overflow-y: auto; padding: 10px; }
         .chat-history-list { list-style: none; padding: 0; margin: 0; }
@@ -67,7 +68,7 @@
         .chat-box { flex-grow: 1; padding: 24px; overflow-y: auto; background-color: var(--bg-chat); position: relative; }
         .welcome-container { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: var(--text-secondary); opacity: 0.8; }
         .welcome-container.visible { display: flex; }
-        .welcome-container .logo { width: 60px; height: 60px; margin-bottom: 20px; }
+        .welcome-container .logo { width: 60px; height: 60px; border-radius: 12px; margin-bottom: 20px; }
         .welcome-container h2 { font-size: 1.8rem; color: var(--text-primary); margin: 0 0 10px 0; font-weight: 500;}
         
         .message-wrapper { display: flex; flex-direction: column; margin-bottom: 12px; }
@@ -108,7 +109,7 @@
 </head>
 <body>
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header"><div class="logo-title"><img src="https://i.ibb.co/WptR9Fgg/Whats-App-Image-2025-06-28-at-12-22-35-AM-Photoroom.png" alt="Logo" class="logo"><h2>QuerySolver</h2></div></div>
+        <div class="sidebar-header"><div class="logo-title"><img src="https://i.ibb.co/R40vTCDB/QSlogo.jpg" alt="Logo" class="logo"><h2>QuerySolver</h2></div></div>
         <div class="sidebar-content"><ul class="chat-history-list" id="chat-history-list"></ul></div>
         <div class="sidebar-footer">
             <div class="menu-item" id="share-chat-btn"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg><span>Share Chat</span></div>
@@ -167,11 +168,11 @@
         function loadChatHistory() { const saved = localStorage.getItem('chatHistory'); chatHistory = saved ? JSON.parse(saved) : {}; const chatIds = Object.keys(chatHistory); if (chatIds.length > 0) { currentChatId = chatIds[chatIds.length - 1]; loadChat(currentChatId); } else { showWelcomeMessage(); } renderChatHistoryList(); }
         function loadChat(chatId) { if (!chatHistory[chatId]) return; currentChatId = chatId; const { messages } = chatHistory[chatId]; dom.chatBox.innerHTML = ''; messages.forEach(msg => appendMessage(msg.rawText, msg.sender, false, true)); renderChatHistoryList(); }
         function renderChatHistoryList() { dom.chatHistoryList.innerHTML = ''; Object.keys(chatHistory).reverse().forEach(id => { const item = document.createElement('li'); item.dataset.chatId = id; item.textContent = chatHistory[id].title; if (id === currentChatId) item.classList.add('active'); const deleteBtn = document.createElement('button'); deleteBtn.className = 'chat-delete-btn'; deleteBtn.innerHTML = ICONS.trash; deleteBtn.title = "Delete Chat"; item.appendChild(deleteBtn); dom.chatHistoryList.appendChild(item); }); }
-        function showWelcomeMessage() { dom.chatBox.innerHTML = `<div class="welcome-container visible"><img src="https://i.ibb.co/WptR9Fgg/Whats-App-Image-2025-06-28-at-12-22-35-AM-Photoroom.png" alt="Logo" class="logo"><h2>How can I help you today?</h2></div>`; }
-        function handleHistoryClick(e) { const li = e.target.closest('li'); if (!li) return; const chatId = li.dataset.chatId; if (e.target.closest('.chat-delete-btn')) deleteChat(chatId, e); else loadChat(chatId); }
+        function showWelcomeMessage() { dom.chatBox.innerHTML = `<div class="welcome-container visible"><img src="https://i.ibb.co/R40vTCDB/QSlogo.jpg" alt="Logo" class="logo"><h2>How can I help you today?</h2></div>`; }
+        function handleHistoryClick(e) { const li = e.target.closest('li'); if (!li) return; const chatId = li.dataset.chatId; if (e.target.closest('.chat-delete-btn')) deleteChat(chatId, e); else { closeSidebar(); loadChat(chatId); } }
         function deleteChat(chatId, e) { e.stopPropagation(); setTimeout(() => { if (confirm(`Are you sure you want to delete "${chatHistory[chatId].title}"?`)) { delete chatHistory[chatId]; if (currentChatId === chatId) handleNewChat(); renderChatHistoryList(); saveChatHistory(); } }, 50); }
 
-        async function handleSendMessage() { const messageText = dom.userInput.value.trim(); if (!messageText) return; if (API_KEY === 'PASTE_YOUR_API_KEY_HERE') { alert('Please get a free API key and paste it into the script.'); return; } let isNewChat = !currentChatId; if (isNewChat) { dom.chatBox.innerHTML = ''; currentChatId = `chat-${Date.now()}`; chatHistory[currentChatId] = { title: 'New Chat', messages: [] }; renderChatHistoryList(); } appendMessage(messageText, 'user', true); dom.userInput.value = ''; showStopButton(); abortController = new AbortController(); try { const aiResponse = await askOpenAI(abortController.signal); appendMessage(aiResponse, 'bot', true); if (isNewChat) generateChatTitle(messageText, aiResponse); } catch (error) { if (error.name !== 'AbortError') { const errorMsg = `❌ Error: ${error.message}.`; appendMessage(errorMsg, 'bot', true, true); } } finally { setSendButtonContent(); abortController = null; } }
+        async function handleSendMessage() { const messageText = dom.userInput.value.trim(); if (!messageText) return; if (API_KEY === 'PASTE_YOUR_API_KEY_HERE') { alert('Please paste your OpenAI API key into the script to use this website.'); return; } let isNewChat = !currentChatId; if (isNewChat) { dom.chatBox.innerHTML = ''; currentChatId = `chat-${Date.now()}`; chatHistory[currentChatId] = { title: 'New Chat', messages: [] }; renderChatHistoryList(); } appendMessage(messageText, 'user', true); dom.userInput.value = ''; showStopButton(); abortController = new AbortController(); try { const aiResponse = await askOpenAI(abortController.signal); appendMessage(aiResponse, 'bot', true); if (isNewChat) generateChatTitle(messageText, aiResponse); } catch (error) { if (error.name !== 'AbortError') { const errorMsg = `❌ Error: ${error.message}.`; appendMessage(errorMsg, 'bot', true, true); } } finally { setSendButtonContent(); abortController = null; } }
         async function askOpenAI(signal, customPrompt = null) { const messages = [{ role: 'system', content: `You are QuerySolver, a world-class multilingual AI assistant. Your primary goal is to be helpful, friendly, and accurate. You MUST detect the language of the user's query and ALWAYS respond in that same language. The only exception is when you are asked to generate a title for a conversation, which should always be in English.` }]; if (customPrompt) { messages.push({ role: 'user', content: customPrompt }); } else { messages.push(...chatHistory[currentChatId].messages.map(m => ({role: m.sender === 'user' ? 'user' : 'assistant', content: m.rawText}))); } const response = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` }, body: JSON.stringify({ model: 'gpt-3.5-turbo', messages: messages }), signal }); if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error?.message || `API Error: ${response.status}`); } const reply = await response.json(); return reply.choices[0].message.content; }
         async function generateChatTitle(userPrompt, aiResponse) { const prompt = `Create a very short, 4-word maximum title for the following conversation. The title should be in English. \n\nUSER: ${userPrompt}\nASSISTANT: ${aiResponse}`; try { const title = await askOpenAI(null, prompt); chatHistory[currentChatId].title = title.replace(/"/g, '').trim(); renderChatHistoryList(); saveChatHistory(); } catch (e) { console.error("Title generation failed:", e); } }
         function abortGeneration() { if (abortController) { abortController.abort(); const lastBotMsg = dom.chatBox.querySelector('.bot-message:last-child:not(.finished-typing)'); if (lastBotMsg) { lastBotMsg.classList.add('finished-typing'); lastBotMsg.querySelector('.message-content').classList.remove('typing-cursor'); } } }
